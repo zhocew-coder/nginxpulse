@@ -714,7 +714,9 @@ func parseLogTime(raw, layout string) (time.Time, error) {
 
 	var lastErr error
 	for _, l := range layouts {
-		parsed, err := time.Parse(l, raw)
+		// 使用 time.ParseInLocation 解析带时区的时间字符串
+		// 对于 Nginx 日志格式 (02/Jan/2006:15:04:05 -0700)，时区信息会被正确解析
+		parsed, err := time.ParseInLocation(l, raw, time.UTC)
 		if err == nil {
 			return parsed, nil
 		}

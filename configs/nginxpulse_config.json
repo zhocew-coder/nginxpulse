@@ -2,13 +2,20 @@
   "websites": [
     {
       "name": "GZ Log Test",
-      "logPath": "var/log/gz-log-read-test/*.gz",
-      "domains": ["localhost"]
+      "logPath": "/home/joyce/workspace/nginx_log/*.log",
+      "domains": [
+        "localhost"
+      ],
+      "logType": "nginx",
+      "logFormat": "",
+      "logRegex": "",
+      "timeLayout": "",
+      "autoDiscoverHosts": false
     }
   ],
   "system": {
     "logDestination": "file",
-    "taskInterval": "1m",
+    "taskInterval": "5s",
     "logRetentionDays": 30,
     "parseBatchSize": 100,
     "ipGeoCacheLimit": 1000000,
@@ -16,32 +23,13 @@
     "demoMode": false,
     "accessKeys": [],
     "language": "zh-CN",
-    "mobilePwaEnabled": false
+    "mobilePwaEnabled": true
   },
   "database": {
     "driver": "postgres",
-    "dsn": "postgres://nginxpulse:nginxpulse@127.0.0.1:5432/nginxpulse?sslmode=disable",
-    "maxOpenConns": 10,
-    "maxIdleConns": 5,
-    "connMaxLifetime": "30m"
+    "dsn": "postgres://nginxpulse:nginxpulse@127.0.0.1:5432/nginxpulse?sslmode=disable"
   },
   "server": {
     "Port": ":8089"
-  },
-  "pvFilter": {
-    "statusCodeInclude": [
-      200
-    ],
-    "excludePatterns": [
-      "favicon.ico$",
-      "robots.txt$",
-      "sitemap.xml$",
-      "^/health$",
-      "^/_(?:nuxt|next)/",
-      "rss.xml$",
-      "feed.xml$",
-      "atom.xml$"
-    ],
-    "excludeIPs": ["127.0.0.1", "::1", "10.10.0.1", "192.168.30.21"]
   }
 }
