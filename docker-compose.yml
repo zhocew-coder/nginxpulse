@@ -1,16 +1,26 @@
+version: "3.8"
 services:
   nginxpulse:
-    image: magiccoders/nginxpulse:latest
-    container_name: local_nginxpulse
-    network_mode: host
+    image: nginxpulse:local
+    build:
+      context: .
+      args:
+        GOPROXY: "https://goproxy.cn,direct"
+        GO_BINARY_BASE_URL: "https://mirrors.aliyun.com/golang/"
+    container_name: nginxpulse_local
     ports:
       - "8088:8088"
       - "8089:8089"
+    environment:
+      # 这里的UID/GID需要跟你主机上查到的保持一致
+      PUID: "1000"
+      PGID: "1000"
     volumes:
-      - ./docker_local/logs:/share/logs
+      - ./docker_local/logs:/share/logs:ro
       - ./docker_local/nginxpulse_data:/app/var/nginxpulse_data
       - ./docker_local/pgdata:/app/var/pgdata
-      - ./docker_local/configs:/app/configs
-      - /etc/localtime:/etc/localtime
+      - /etc/localtime:/etc/localtime:ro
+      - ./configs/nginxpulse_config.dev.json:/app/configs/nginxpulse_config.json:ro
+      - /home/joyce/workspace/nginx_log/:/home/joyce/workspace/nginx_log/:ro
     stop_grace_period: 90s
     restart: unless-stopped

@@ -30,17 +30,12 @@ RUN cd webapp_mobile && pnpm run build
 
 FROM golang:1.24.0-alpine AS backend-builder
 
-ARG GOPROXY_PRIMARY=https://proxy.golang.org,direct
-ARG GOPROXY_FALLBACK=https://goproxy.cn,direct
-ENV GOPROXY=${GOPROXY_PRIMARY}
+ARG GOPROXY=https://goproxy.cn,direct
+ENV GOPROXY=${GOPROXY}
 
 WORKDIR /src
 COPY go.mod go.sum ./
-RUN set -eu; \
-    if go env -w GOPROXY="${GOPROXY_PRIMARY}" && go mod download; then \
-      exit 0; \
-    fi; \
-    go env -w GOPROXY="${GOPROXY_FALLBACK}"; \
+RUN go env -w GOPROXY="${GOPROXY}" && \
     for attempt in 1 2 3; do \
       go mod download && exit 0; \
       if [ "$attempt" -eq 3 ]; then exit 1; fi; \

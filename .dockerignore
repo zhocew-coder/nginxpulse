@@ -11,6 +11,9 @@ appstore
 dist
 prebuilt
 var
+bin
+node_modules
+**/node_modules
 
 img.png
 img_1.png
@@ -27,3 +30,7 @@ Dockerfile.agent
 
 docs
 !docs/external_ips.txt
+
+# Build artifacts
+*.log
+*.tmp

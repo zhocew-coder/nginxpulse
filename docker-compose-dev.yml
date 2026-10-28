@@ -4,6 +4,9 @@ services:
     image: nginxpulse:local
     build:
       context: .
+      args:
+        GOPROXY: "https://goproxy.cn,direct"
+        GO_BINARY_BASE_URL: "https://mirrors.aliyun.com/golang/"
     container_name: nginxpulse_local
     ports:
       - "8088:8088"
@@ -17,5 +20,7 @@ services:
       - ./docker_local/nginxpulse_data:/app/var/nginxpulse_data
       - ./docker_local/pgdata:/app/var/pgdata
       - /etc/localtime:/etc/localtime:ro
+      - ./configs/nginxpulse_config.dev.json:/app/configs/nginxpulse_config.json:ro
+      - /home/joyce/workspace/nginx_log/:/home/joyce/workspace/nginx_log/:ro
     stop_grace_period: 90s
     restart: unless-stopped
