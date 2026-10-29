@@ -34,3 +34,6 @@ docs
 # Build artifacts
 *.log
 *.tmp
+
+# Local data (permission issues)
+docker_local/

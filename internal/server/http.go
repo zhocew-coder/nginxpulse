@@ -3,20 +3,23 @@ package server
 import (
 	"net"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/likaia/nginxpulse/internal/ai"
 	"github.com/likaia/nginxpulse/internal/analytics"
 	"github.com/likaia/nginxpulse/internal/ingest"
+	"github.com/likaia/nginxpulse/internal/store"
 	"github.com/likaia/nginxpulse/internal/web"
 	"github.com/sirupsen/logrus"
 )
 
 // StartHTTPServer configures and starts the HTTP server in a goroutine.
-func StartHTTPServer(statsFactory *analytics.StatsFactory, logParser *ingest.LogParser, addr string) (*http.Server, error) {
-	router := buildRouter(statsFactory, logParser)
+func StartHTTPServer(statsFactory *analytics.StatsFactory, logParser *ingest.LogParser, addr string, repository *store.Repository) (*http.Server, error) {
+	router := buildRouter(statsFactory, logParser, repository)
 	server := &http.Server{
 		Addr:    addr,
 		Handler: router,
@@ -37,7 +40,7 @@ func StartHTTPServer(statsFactory *analytics.StatsFactory, logParser *ingest.Log
 	return server, nil
 }
 
-func buildRouter(statsFactory *analytics.StatsFactory, logParser *ingest.LogParser) *gin.Engine {
+func buildRouter(statsFactory *analytics.StatsFactory, logParser *ingest.LogParser, repository *store.Repository) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 
@@ -56,10 +59,40 @@ func buildRouter(statsFactory *analytics.StatsFactory, logParser *ingest.LogPars
 	router.GET("/healthz", gin.WrapF(HealthHandler))
 
 	web.SetupRoutes(router, statsFactory, logParser)
+	
+	// Register AI routes if repository is provided
+	if repository != nil {
+		registerAIRoutes(router, repository)
+	}
+	
 	attachAppConfig(router)
 	attachWebUI(router)
 
 	return router
+}
+
+// registerAIRoutes registers AI-related routes
+func registerAIRoutes(router *gin.Engine, repository *store.Repository) {
+	// Try to load AI config
+	configPath := "/app/configs/ai_config.json"
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		// Try alternative path
+		configPath = "configs/ai_config.json"
+	}
+	
+	aiConfig, err := ai.LoadConfig(configPath)
+	if err != nil {
+		logrus.WithError(err).Warn("加载 AI 配置文件失败，AI 功能将不可用")
+		return
+	}
+
+	// Create LLM client
+	llmClient := ai.NewLLMClient(aiConfig.LLM)
+
+	// Register AI routes
+	ai.RegisterRoutes(router, repository, llmClient)
+	
+	logrus.Info("AI 功能已启用")
 }
 
 func requestLogger() gin.HandlerFunc {

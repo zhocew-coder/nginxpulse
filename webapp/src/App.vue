@@ -33,6 +33,7 @@
         <RouterLink to="/daily" class="menu-item" :class="{ active: isActive('/daily') }">{{ t('app.menu.daily') }}</RouterLink>
         <RouterLink to="/realtime" class="menu-item" :class="{ active: isActive('/realtime') }">{{ t('app.menu.realtime') }}</RouterLink>
         <RouterLink to="/logs" class="menu-item" :class="{ active: isActive('/logs') }">{{ t('app.menu.logs') }}</RouterLink>
+        <RouterLink to="/ai" class="menu-item" :class="{ active: isActive('/ai') }">{{ t('app.menu.ai') }}</RouterLink>
         <RouterLink to="/settings" class="menu-item" :class="{ active: isActive('/settings') }">{{ t('app.menu.setup') }}</RouterLink>
       </nav>
       <div class="sidebar-language-compact" role="group" :aria-label="t('app.sidebar.language')" :key="currentLocale">
@@ -130,6 +131,7 @@
         </div>
       </div>
     </template>
+    <Toast position="top-right" />
   </div>
 </template>
 

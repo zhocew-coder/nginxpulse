@@ -10,6 +10,7 @@ const zhCN = {
       realtime: '实时',
       logs: '访问明细',
       setup: '系统配置',
+      ai: 'AI 智能分析',
     },
     sidebar: {
       recentActive: '近期活跃',
@@ -18,6 +19,7 @@ const zhCN = {
       realtimeHint: '关注窗口内实时行为趋势',
       logsHint: '按条件过滤并分页浏览',
       setupHint: '修改站点、数据库与系统参数',
+      aiHint: 'AI 驱动的异常检测、智能查询和报表生成',
       language: '语言',
     },
     version: {

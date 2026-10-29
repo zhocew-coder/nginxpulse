@@ -10,9 +10,11 @@ require (
 	github.com/gin-contrib/cors v1.7.4
 	github.com/gin-gonic/gin v1.10.0
 	github.com/jackc/pgx/v5 v5.8.0
+	github.com/lib/pq v1.10.9
 	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20260121081438-f2c988287c27
 	github.com/mileusna/useragent v1.3.5
 	github.com/pkg/sftp v1.13.6
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/crypto v0.38.0
 )

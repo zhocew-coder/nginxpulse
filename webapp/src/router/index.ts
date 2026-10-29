@@ -6,6 +6,7 @@ const DailyPage = () => import('@/pages/DailyPage.vue');
 const RealtimePage = () => import('@/pages/RealtimePage.vue');
 const LogsPage = () => import('@/pages/LogsPage.vue');
 const SetupPage = () => import('@/pages/SetupPage.vue');
+const AIPage = () => import('@/pages/AIPage.vue');
 
 const router = createRouter({
   history: createWebHistory(getWebBasePathWithSlash()),
@@ -59,6 +60,16 @@ const router = createRouter({
         sidebarLabelKey: 'app.menu.setup',
         sidebarHintKey: 'app.sidebar.setupHint',
         mainClass: 'setup-route',
+      },
+    },
+    {
+      path: '/ai',
+      name: 'ai',
+      component: AIPage,
+      meta: {
+        sidebarLabelKey: 'app.menu.ai',
+        sidebarHintKey: 'app.sidebar.aiHint',
+        mainClass: 'ai-page',
       },
     },
   ],

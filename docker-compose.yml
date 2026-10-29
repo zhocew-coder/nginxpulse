@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   nginxpulse:
     image: nginxpulse:local
@@ -12,15 +11,20 @@ services:
       - "8088:8088"
       - "8089:8089"
     environment:
-      # 这里的UID/GID需要跟你主机上查到的保持一致
+      # 这里的 UID/GID 需要跟你主机上查到的保持一致
       PUID: "1000"
       PGID: "1000"
     volumes:
       - ./docker_local/logs:/share/logs:ro
       - ./docker_local/nginxpulse_data:/app/var/nginxpulse_data
-      - ./docker_local/pgdata:/app/var/pgdata
+      - pgdata:/app/var/pgdata
       - /etc/localtime:/etc/localtime:ro
       - ./configs/nginxpulse_config.dev.json:/app/configs/nginxpulse_config.json:ro
+      - ./configs/ai_config.json:/app/configs/ai_config.json:ro
+      - ./scripts/ai_migrate.sql:/app/scripts/ai_migrate.sql:ro
       - /home/joyce/workspace/nginx_log/:/home/joyce/workspace/nginx_log/:ro
     stop_grace_period: 90s
     restart: unless-stopped
+
+volumes:
+  pgdata:

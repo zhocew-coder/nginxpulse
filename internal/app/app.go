@@ -46,7 +46,7 @@ func Run() error {
 	defer cancel()
 
 	if setupMode {
-		serverHandle, err := server.StartHTTPServer(nil, nil, cfg.Server.Port)
+		serverHandle, err := server.StartHTTPServer(nil, nil, cfg.Server.Port, nil)
 		if err != nil {
 			return err
 		}
@@ -67,7 +67,7 @@ func Run() error {
 	logParser := ingest.NewLogParser(repository)
 	statsFactory := analytics.NewStatsFactory(repository)
 
-	serverHandle, err := server.StartHTTPServer(statsFactory, logParser, cfg.Server.Port)
+	serverHandle, err := server.StartHTTPServer(statsFactory, logParser, cfg.Server.Port, repository)
 	if err != nil {
 		return err
 	}

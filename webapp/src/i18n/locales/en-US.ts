@@ -10,6 +10,7 @@ const enUS = {
       realtime: 'Realtime',
       logs: 'Logs',
       setup: 'Settings',
+      ai: 'AI Analytics',
     },
     sidebar: {
       recentActive: 'Recent Activity',
@@ -18,6 +19,7 @@ const enUS = {
       realtimeHint: 'Realtime behavior trends in window',
       logsHint: 'Filter and paginate access logs',
       setupHint: 'Adjust websites, database, and system settings',
+      aiHint: 'AI-powered anomaly detection, smart queries, and reports',
       language: 'Language',
     },
     version: {

@@ -48,6 +48,13 @@ ARG TARGETARCH
 ARG BUILD_TIME
 ARG GIT_COMMIT
 ARG VERSION
+RUN go env -w GOPROXY="${GOPROXY}" && \
+    go mod tidy && \
+    for attempt in 1 2 3; do \
+      go mod download && exit 0; \
+      if [ "$attempt" -eq 3 ]; then exit 1; fi; \
+      sleep 2; \
+    done
 RUN CGO_ENABLED=0 \
     GOOS=${TARGETOS:-$(go env GOOS)} \
     GOARCH=${TARGETARCH:-$(go env GOARCH)} \
@@ -63,6 +70,19 @@ ARG VERSION
 RUN apk add --no-cache su-exec \
     postgresql \
     postgresql-client \
+    postgresql-dev \
+    git \
+    build-base \
+    cmake \
+    && apk add --no-cache --virtual .build-deps git cmake build-base \
+    && cd /tmp \
+    && git clone --branch v0.8.0 https://github.com/pgvector/pgvector.git \
+    && cd pgvector \
+    && make OPTFLAGS="" \
+    && make install \
+    && cd /tmp && rm -rf pgvector \
+    && apk del .build-deps \
+    && apk del git cmake build-base \
     && addgroup -S nginxpulse \
     && adduser -S nginxpulse -G nginxpulse \
     && mkdir -p /tmp \

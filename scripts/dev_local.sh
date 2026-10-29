@@ -220,7 +220,7 @@ start_postgres() {
       -e POSTGRES_DB="$PG_DB" \
       -p "${PG_PORT}:5432" \
       -v "${PG_VOLUME}:/var/lib/postgresql/data" \
-      postgres:16 >/dev/null
+      postgres:17 >/dev/null
     pg_started_by_us=1
   fi
 

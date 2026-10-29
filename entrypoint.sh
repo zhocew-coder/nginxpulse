@@ -265,6 +265,11 @@ server {
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
+    # AI endpoints call an external LLM and can take 30s+; the nginx default
+    # of 60s read timeout is too tight and causes spurious 499/504s.
+    proxy_connect_timeout 10s;
+    proxy_send_timeout 180s;
+    proxy_read_timeout 180s;
   }
 
   location = /m {
@@ -350,6 +355,9 @@ server {
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_connect_timeout 10s;
+    proxy_send_timeout 180s;
+    proxy_read_timeout 180s;
   }
 
   location = /$base_path/api {
@@ -473,6 +481,23 @@ ensure_database() {
   fi
 }
 
+# Create the tables the AI module needs. Idempotent (CREATE TABLE IF NOT EXISTS),
+# so it is safe to run on every boot. Without this, anomaly detection fails with
+# "relation ai_anomaly_reports does not exist" as soon as it finds anything.
+apply_ai_migration() {
+  local sql="${AI_MIGRATE_SQL:-/app/scripts/ai_migrate.sql}"
+  [ -f "$sql" ] || return 0
+  export PGPASSWORD="$POSTGRES_PASSWORD"
+  if su-exec "$APP_USER:$APP_GROUP" psql -h "$POSTGRES_CONNECT_HOST" -p "$POSTGRES_PORT" \
+      -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f "$sql" >/dev/null 2>&1; then
+    echo "nginxpulse: AI tables are up to date"
+  else
+    # Non-fatal: the app still works, only AI persistence is degraded. The
+    # pgvector extension in particular may be unavailable on some images.
+    echo "nginxpulse: warning: could not apply AI migration from $sql" >&2
+  fi
+}
+
 if [ "$USE_EMBEDDED_PG" = "1" ] && [ -z "${DB_DSN:-}" ]; then
   export DB_DRIVER="postgres"
   export DB_DSN="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_CONNECT_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable"
@@ -485,6 +510,7 @@ if [ "$USE_EMBEDDED_PG" = "1" ]; then
     exit 1
   fi
   ensure_database
+  apply_ai_migration
 fi
 
 if command -v nginx >/dev/null 2>&1; then

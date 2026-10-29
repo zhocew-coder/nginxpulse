@@ -1,0 +1,40 @@
+{
+  "llm": {
+    "provider": "openai",
+    "model": "qwen3.5-397b-a17b",
+    "apiKey": "PubYDsWd-W8dl69OXgeRQpxpzqDeq7pjQFTWhsPkX5k",
+    "baseUrl": "https://zhenze-huhehaote.cmecloud.cn/v1",
+    "timeout": 120,
+    "maxTokens": 4096,
+    "temperature": 0.3
+  },
+  "embedding": {
+    "model": "text-embedding-3-small",
+    "dimension": 1536
+  },
+  "anomalyDetection": {
+    "enabled": true,
+    "checkInterval": "5m",
+    "qpmThreshold": 100,
+    "errorRateThreshold": 0.3
+  },
+  "nl2sql": {
+    "enabled": true,
+    "safetyCheck": true,
+    "maxLimit": 1000
+  },
+  "reports": {
+    "daily": { 
+      "enabled": true, 
+      "schedule": "0 8 * * *" 
+    },
+    "weekly": { 
+      "enabled": true, 
+      "schedule": "0 9 * * 1" 
+    },
+    "monthly": { 
+      "enabled": true, 
+      "schedule": "0 10 1 * *" 
+    }
+  }
+}

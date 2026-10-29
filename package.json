@@ -26,5 +26,8 @@
     "mobile:preview": "pnpm --dir ./webapp_mobile preview",
     "fumadocs:dev": "bash ./scripts/dev_fumadocs.sh",
     "fumadocs:build": "bash ./scripts/build_fumadocs.sh"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1"
   }
 }
