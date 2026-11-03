@@ -1,4 +1,40 @@
+# NginxPulse 编排（PostgreSQL 已从单体镜像拆为独立容器）
+#
+# 变更说明：
+#   原架构为单体镜像内置 PostgreSQL（仅监听容器内 127.0.0.1:5432，宿主机不可达）。
+#   为满足「交易量预测与 AI 业务态势分析模块」需要宿主机直连数据库的需求，
+#   将 PostgreSQL 拆分为独立 `db` 服务（端口 5432 映射到宿主机），
+#   nginxpulse 主服务通过 DB_DSN 连接外部数据库（entrypoint 会自动禁用内置 PG）。
+#
+# 数据：PostgreSQL 数据目录持久化在 ./docker_local/pgdata（bind mount）。
+#
+# 启动：docker compose up -d
+# 停止：docker compose down
+
 services:
+  db:
+    # 基于 postgres:16 + pgvector 0.8.7（NginxPulse AI 模块需要 vector 扩展，
+    # 官方 postgres 镜像不带该扩展）。已固化到本地镜像，重建容器不会丢失。
+    # 如需重建该镜像：docker run postgres:16 → 安装
+    #   postgresql-16-pgvector（PGDG pool/main/p/pgvector）→ docker commit
+    image: nginxpulse-pg:16-vector
+    container_name: nginxpulse_pg
+    environment:
+      POSTGRES_USER: nginxpulse
+      POSTGRES_PASSWORD: nginxpulse
+      POSTGRES_DB: nginxpulse
+    ports:
+      # 映射至宿主机，供 forecast-service（Python 预测服务）直连
+      - "5432:5432"
+    volumes:
+      - ./docker_local/pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nginxpulse -d nginxpulse"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
   nginxpulse:
     image: nginxpulse:local
     build:
@@ -11,20 +47,22 @@ services:
       - "8088:8088"
       - "8089:8089"
     environment:
-      # 这里的 UID/GID 需要跟你主机上查到的保持一致
+      # 指向独立 PG 容器；设置后 entrypoint 会禁用内置 PostgreSQL
+      DB_DSN: "postgres://nginxpulse:nginxpulse@nginxpulse_pg:5432/nginxpulse?sslmode=disable"
+      # UID/GID 需与宿主机目录属主保持一致
       PUID: "1000"
       PGID: "1000"
     volumes:
       - ./docker_local/logs:/share/logs:ro
       - ./docker_local/nginxpulse_data:/app/var/nginxpulse_data
-      - pgdata:/app/var/pgdata
+      # 内置 PG 数据卷已移除（数据库由 db 服务提供）
       - /etc/localtime:/etc/localtime:ro
       - ./configs/nginxpulse_config.dev.json:/app/configs/nginxpulse_config.json:ro
       - ./configs/ai_config.json:/app/configs/ai_config.json:ro
       - ./scripts/ai_migrate.sql:/app/scripts/ai_migrate.sql:ro
       - /home/joyce/workspace/nginx_log/:/home/joyce/workspace/nginx_log/:ro
+    depends_on:
+      db:
+        condition: service_healthy
     stop_grace_period: 90s
     restart: unless-stopped
-
-volumes:
-  pgdata:

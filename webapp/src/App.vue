@@ -34,6 +34,10 @@
         <RouterLink to="/realtime" class="menu-item" :class="{ active: isActive('/realtime') }">{{ t('app.menu.realtime') }}</RouterLink>
         <RouterLink to="/logs" class="menu-item" :class="{ active: isActive('/logs') }">{{ t('app.menu.logs') }}</RouterLink>
         <RouterLink to="/ai" class="menu-item" :class="{ active: isActive('/ai') }">{{ t('app.menu.ai') }}</RouterLink>
+        <!-- 阶段二新增：预测对象管理（中文硬编码，不接入 i18n） -->
+        <RouterLink to="/forecast-objects" class="menu-item" :class="{ active: isActive('/forecast-objects') }">预测对象管理</RouterLink>
+        <!-- 阶段四新增：活动日历（中文硬编码，不接入 i18n） -->
+        <RouterLink to="/forecast-events" class="menu-item" :class="{ active: isActive('/forecast-events') }">活动日历</RouterLink>
         <RouterLink to="/settings" class="menu-item" :class="{ active: isActive('/settings') }">{{ t('app.menu.setup') }}</RouterLink>
       </nav>
       <div class="sidebar-language-compact" role="group" :aria-label="t('app.sidebar.language')" :key="currentLocale">
@@ -152,11 +156,31 @@ const { t, n, locale } = useI18n({ useScope: 'global' });
 
 const ACCESS_KEY_EVENT = 'nginxpulse:access-key-required';
 
+// 预测对象管理 / 活动日历页文案为中文硬编码，侧边栏底部说明同样直接写中文
+const HARDCODED_SIDEBAR: Record<string, { label: string; hint: string }> = {
+  '/forecast-objects': {
+    label: '预测对象管理',
+    hint: '交易量预测对象准入评估与人工干预',
+  },
+  '/forecast-events': {
+    label: '活动日历',
+    hint: '业务活动维护与预热 / 正式 / 回落期日历',
+  },
+};
+
 const sidebarLabel = computed(() => {
+  const hardcoded = HARDCODED_SIDEBAR[route.path];
+  if (hardcoded) {
+    return hardcoded.label;
+  }
   const key = route.meta.sidebarLabelKey as string;
   return key ? t(key) : '';
 });
 const sidebarHint = computed(() => {
+  const hardcoded = HARDCODED_SIDEBAR[route.path];
+  if (hardcoded) {
+    return hardcoded.hint;
+  }
   const key = route.meta.sidebarHintKey as string;
   return key ? t(key) : '';
 });

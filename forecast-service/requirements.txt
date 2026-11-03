@@ -1,0 +1,23 @@
+# NginxPulse 交易量预测服务 — Python 依赖清单
+# Python 版本：3.13.x（与项目后端环境一致）
+# 创建方式见同目录 README_FORECAST.md
+
+# ---- Web 框架 ----
+fastapi>=0.110
+uvicorn[standard]>=0.27
+pydantic>=2.0
+
+# ---- 数据处理 / 数值计算 ----
+pandas>=2.2
+numpy>=2.0
+
+# ---- 数据库驱动（复用 NginxPulse PostgreSQL）----
+psycopg2-binary>=2.9
+
+# ---- 预测算法（阶段三使用，提前装齐）----
+# 季节性/ETS/SARIMA 统计模型
+statsmodels>=0.14
+# 梯度提升，活动影响外生建模
+lightgbm>=4.3
+# 特征工程与模型对比
+scikit-learn>=1.4

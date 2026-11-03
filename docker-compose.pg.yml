@@ -1,0 +1,25 @@
+# 独立 PostgreSQL 容器 — 从 NginxPulse 单体镜像拆出
+# 阶段二预测服务需要宿主机可达的 PG 端口
+# 使用 pgvector 镜像以兼容 ai 扩展
+
+services:
+  pg:
+    image: pgvector/pgvector:pg16
+    container_name: nginxpulse_pg
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: nginxpulse
+      POSTGRES_PASSWORD: nginxpulse
+      POSTGRES_DB: nginxpulse
+    volumes:
+      - nginxpulse_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nginxpulse -d nginxpulse"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  nginxpulse_pgdata:
